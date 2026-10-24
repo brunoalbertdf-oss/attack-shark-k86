@@ -11,7 +11,7 @@ Feito para ser mais simples e direto que o driver oficial.
 
 ## Baixar e instalar
 
-1. Baixe **`Instalar Attack Shark K86.exe`** na página de [Releases](../../releases/latest).
+1. Baixe **`Instalar-Attack-Shark-K86-<versão>.exe`** na página de [Releases](../../releases/latest).
 2. Dê dois cliques. Se aparecer "O Windows protegeu o computador", clique em
    **Mais informações → Executar assim mesmo** (o app não tem assinatura digital paga).
 3. Abra **Attack Shark K86** pelo Menu Iniciar.
