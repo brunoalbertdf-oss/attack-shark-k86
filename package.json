@@ -1,0 +1,44 @@
+{
+  "name": "k86-controle",
+  "productName": "Attack Shark K86",
+  "version": "1.2.0",
+  "description": "Controle não oficial do teclado Attack Shark K86, em português",
+  "author": "Attack Shark K86 (não oficial)",
+  "private": true,
+  "type": "module",
+  "main": "main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "servidor": "node servidor.mjs",
+    "instalador": "electron-builder --win nsis --x64",
+    "capturas": "electron ferramentas/capturar-telas.mjs"
+  },
+  "dependencies": {
+    "node-hid": "^3.1.2"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.17.0"
+  },
+  "build": {
+    "appId": "local.controle.k86",
+    "productName": "Attack Shark K86",
+    "directories": { "output": "dist" },
+    "npmRebuild": false,
+    "files": ["main.mjs", "servidor.mjs", "k86.mjs", "public/**", "icone.png", "package.json"],
+    "asarUnpack": ["node_modules/node-hid/**"],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "icone.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Attack Shark K86",
+      "runAfterFinish": true,
+      "artifactName": "Instalar Attack Shark K86.${ext}"
+    }
+  }
+}

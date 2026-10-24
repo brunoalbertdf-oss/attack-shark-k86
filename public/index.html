@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attack Shark K86</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">⌨</span>
+      <div>
+        <h1>Attack Shark K86</h1>
+        <p id="status" class="status">Procurando teclado…</p>
+      </div>
+    </div>
+    <nav class="abas" role="tablist">
+      <button role="tab" class="aba ativa" data-aba="luzes">Luzes</button>
+      <button role="tab" class="aba" data-aba="teclas">Cores por tecla</button>
+      <button role="tab" class="aba" data-aba="tela">Tela</button>
+    </nav>
+  </header>
+
+  <div id="aviso-oficial" class="aviso" hidden>
+    <span>O driver oficial da Attack Shark ainda está rodando em segundo plano (<strong id="nomes-oficiais"></strong>) e pode desfazer as suas mudanças.</span>
+    <button id="encerrar-oficial" class="botao secundario">Encerrar driver antigo</button>
+  </div>
+
+  <main>
+    <!-- LUZES -->
+    <section id="aba-luzes" class="painel ativo">
+      <div class="coluna-principal">
+        <h2>Escolha um efeito</h2>
+        <div id="lista-efeitos" class="grade-efeitos"></div>
+      </div>
+      <aside class="lateral">
+        <h2>Ajustes</h2>
+        <div id="campo-direcao" class="campo" hidden>
+          <span>Direção</span>
+          <div id="direcoes" class="direcoes" role="radiogroup"></div>
+        </div>
+        <label class="campo">
+          <span>Brilho <output id="valor-brilho"></output></span>
+          <input id="brilho" type="range" min="0" max="4" step="1">
+        </label>
+        <label id="campo-velocidade" class="campo">
+          <span>Velocidade <output id="valor-velocidade"></output></span>
+          <input id="velocidade" type="range" min="0" max="4" step="1">
+        </label>
+        <div id="campo-cor" class="campo">
+          <span>Cor</span>
+          <div class="alternador" role="radiogroup">
+            <button type="button" data-modo="arcoiris" class="opcao">🌈 Arco-íris</button>
+            <button type="button" data-modo="fixa" class="opcao">Cor única</button>
+          </div>
+          <div id="area-cor" class="area-cor">
+            <div id="cores-rapidas" class="cores-rapidas"></div>
+            <input id="cor-luz" type="color" value="#00aaff" aria-label="Escolher cor">
+          </div>
+        </div>
+        <p class="dica">As mudanças vão direto para o teclado.</p>
+      </aside>
+    </section>
+
+    <!-- CORES POR TECLA -->
+    <section id="aba-teclas" class="painel">
+      <div class="coluna-principal">
+        <h2>Pinte as teclas</h2>
+        <p class="dica">Clique ou arraste por cima das teclas para pintar. Botão direito apaga.</p>
+        <div id="teclado" class="teclado" aria-label="Desenho do teclado"></div>
+      </div>
+      <aside class="lateral">
+        <h2>Pincel</h2>
+        <div class="paleta-pincel">
+          <div id="cores-pincel" class="cores-rapidas"></div>
+          <input id="cor-pincel" type="color" value="#ff2d55" aria-label="Cor do pincel">
+        </div>
+        <div class="botoes-empilhados">
+          <button id="pintar-tudo" class="botao secundario">Pintar tudo com esta cor</button>
+          <button id="modelo-arcoiris" class="botao secundario">Modelo: arco-íris</button>
+          <button id="modelo-gamer" class="botao secundario">Modelo: WASD + setas</button>
+          <button id="limpar-teclas" class="botao secundario">Apagar tudo</button>
+        </div>
+        <h2>Layouts salvos</h2>
+        <div class="linha">
+          <input id="nome-layout" type="text" placeholder="Nome do layout">
+          <button id="salvar-layout" class="botao secundario">Salvar</button>
+        </div>
+        <ul id="layouts-salvos" class="lista-salvos"></ul>
+        <button id="enviar-teclas" class="botao principal">Enviar para o teclado</button>
+      </aside>
+    </section>
+
+    <!-- TELA -->
+    <section id="aba-tela" class="painel">
+      <div class="coluna-principal">
+        <h2>Prévia da tela (240 × 135)</h2>
+        <div class="moldura-tela">
+          <canvas id="previa" width="240" height="135"></canvas>
+        </div>
+        <div class="controles-previa">
+          <span id="info-quadros" class="dica"></span>
+        </div>
+
+        <div class="duas-colunas">
+          <div class="cartao">
+            <h3>Imagem ou GIF</h3>
+            <label id="soltar" class="soltar">
+              <input id="arquivo" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp" hidden>
+              <strong>Arraste uma imagem aqui</strong>
+              <span>ou clique para escolher (PNG, JPG, GIF animado de até 15 s)</span>
+            </label>
+            <div class="alternador" role="radiogroup">
+              <button type="button" data-ajuste="preencher" class="opcao">Preencher a tela</button>
+              <button type="button" data-ajuste="ajustar" class="opcao">Mostrar inteira</button>
+            </div>
+          </div>
+          <div class="cartao">
+            <h3>Criar com texto</h3>
+            <input id="texto-tela" type="text" maxlength="40" placeholder="Ex.: Bom jogo!">
+            <div class="linha">
+              <label class="mini">Fundo <input id="fundo-texto" type="color" value="#101828"></label>
+              <label class="mini">Texto <input id="cor-texto" type="color" value="#ffffff"></label>
+              <label class="mini">Tamanho <input id="tamanho-texto" type="range" min="14" max="80" value="36"></label>
+            </div>
+            <button id="usar-texto" class="botao secundario">Usar este texto</button>
+          </div>
+        </div>
+      </div>
+      <aside class="lateral">
+        <h2>Enviar</h2>
+        <label class="campo">
+          <span>Velocidade da animação</span>
+          <select id="velocidade-gif">
+            <option value="0.5">0,5× (mais lenta)</option>
+            <option value="0.75">0,75×</option>
+            <option value="1" selected>1× (original do GIF)</option>
+            <option value="1.5">1,5×</option>
+            <option value="2">2× (mais rápida)</option>
+          </select>
+        </label>
+        <p id="info-animacao" class="dica"></p>
+        <button id="enviar-tela" class="botao principal" disabled>Enviar para a tela</button>
+        <div id="progresso-tela" class="progresso" hidden><div></div></div>
+        <p id="msg-tela" class="dica"></p>
+
+        <h2>Extras da tela</h2>
+        <button id="sincronizar-relogio" class="botao secundario">Acertar relógio e data</button>
+        <label class="interruptor">
+          <input id="info-sistema" type="checkbox">
+          <span>Enviar uso de CPU, RAM e disco</span>
+        </label>
+        <p class="dica">Os dados do PC só aparecem se a tela do teclado estiver no modo de informações do sistema.</p>
+      </aside>
+    </section>
+  </main>
+
+  <div id="aviso-flutuante" class="toast" role="status" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
