@@ -67,7 +67,10 @@ O PID `0x4015` é compartilhado por vários modelos. Existe outro "K86" (chip yc
 [0]=0x07 [1]=efeito [2]=5-velocidade [3]=brilho [4]=(opção<<4)|modoCor [5..7]=R,G,B   checksum Bit8
 ```
 
-- `velocidade` e `brilho`: 0–4.
+- `velocidade` e `brilho`: 0–4. **Brilho 4 é o máximo** do K86 (o driver oficial usa o mesmo limite). **[confirmado]**
+- **Limite de branco [confirmado]**: se os três canais forem ≥ 180 (`0xB4`), o firmware grava `#B4B4B4`
+  (branco a ~70%). Cores com pelo menos um canal abaixo de 180 são gravadas como enviadas.
+  Cores puras (canais em 0 ou 255) dão o máximo de luz.
 - `modoCor`: `8` = arco-íris, `7` = cor única. Efeito 13 (Personalizado): `[4]=opção<<4`, `[5..7]=0,200,200`.
 - Branco puro `#FFFFFF` é enviado como `#FAFFFA`.
 - `0x87` devolve o mesmo layout (`[2]` = 5-velocidade, `[4]>>4` = opção).

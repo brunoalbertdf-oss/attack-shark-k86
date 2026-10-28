@@ -1,7 +1,7 @@
 {
   "name": "k86-controle",
   "productName": "Attack Shark K86",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Controle não oficial do teclado Attack Shark K86, em português",
   "author": "Attack Shark K86 (não oficial)",
   "private": true,

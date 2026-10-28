@@ -25,7 +25,8 @@ const recuperar = (chave, padrao) => {
   try { const v = localStorage.getItem(chave); return v === null ? padrao : JSON.parse(v); } catch { return padrao; }
 };
 
-const CORES = ["#ff2d55", "#ff9500", "#ffd60a", "#34c759", "#00c7be", "#0a84ff", "#5e5ce6", "#bf5af2", "#ffffff"];
+// Cores puras de LED (canais em 0 ou 255): acendem com força total.
+const CORES = ["#ff0000", "#ff8000", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#8000ff", "#ff00ff", "#ffffff"];
 
 // ---------- Abas ----------
 $$(".aba").forEach((b) => b.addEventListener("click", () => {
@@ -70,7 +71,8 @@ $("#encerrar-oficial").addEventListener("click", async (e) => {
 });
 
 // ---------- Luzes ----------
-const NIVEIS = ["Mínimo", "Baixo", "Médio", "Alto", "Máximo"];
+const NIVEIS = ["Mínimo", "Baixo", "Médio", "Alto", "Máximo (100%)"];
+const NIVEIS_VELOCIDADE = ["Mínima", "Baixa", "Média", "Alta", "Máxima"];
 const luz = { efeito: 1, opcao: 0, brilho: 4, velocidade: 2, arcoIris: true, cor: "#00aaff" };
 let efeitos = [];
 const efeitoAtual = () => efeitos.find((e) => e.id === luz.efeito);
@@ -134,12 +136,19 @@ const atualizarControlesLuz = () => {
   $("#valor-brilho").textContent = NIVEIS[luz.brilho] ?? luz.brilho;
   $("#campo-velocidade").hidden = ef?.velocidade === false;
   $("#velocidade").value = luz.velocidade;
-  $("#valor-velocidade").textContent = NIVEIS[luz.velocidade] ?? luz.velocidade;
+  $("#valor-velocidade").textContent = NIVEIS_VELOCIDADE[luz.velocidade] ?? luz.velocidade;
   $("#campo-cor").hidden = ef?.cor === false;
   $$("[data-modo]").forEach((b) => b.classList.toggle("ativa", (b.dataset.modo === "arcoiris") === luz.arcoIris));
   $("#area-cor").classList.toggle("oculta", luz.arcoIris);
   $("#cor-luz").value = luz.cor;
   $$("#cores-rapidas .amostra").forEach((a) => a.classList.toggle("ativa", a.dataset.cor === luz.cor));
+  $("#aviso-branco").hidden = luz.arcoIris || ef?.cor === false || !viraBrancoLimitado(luz.cor);
+};
+
+// O firmware troca por #B4B4B4 (branco a ~70%) toda cor com os três canais em 180 ou mais.
+const viraBrancoLimitado = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return Math.min(n >> 16, (n >> 8) & 0xff, n & 0xff) >= 0xb4 && n !== 0xb4b4b4;
 };
 
 let timerLuz;
@@ -190,7 +199,7 @@ const LAYOUT = [
 ];
 
 let coresTeclas = recuperar("coresTeclas", {});
-let corPincel = recuperar("corPincel", "#ff2d55");
+let corPincel = recuperar("corPincel", "#ff0000");
 const elementosTecla = new Map();
 
 const desenharTeclado = () => {
@@ -269,8 +278,8 @@ $("#modelo-arcoiris").addEventListener("click", () => {
 });
 $("#modelo-gamer").addEventListener("click", () => {
   coresTeclas = Object.fromEntries([...elementosTecla.keys()].map((h) => [h, "#1a1a40"]));
-  for (const h of [26, 4, 22, 7, 82, 80, 81, 79]) coresTeclas[h] = "#ff2d55";
-  for (const h of [44, 225, 224, 41]) coresTeclas[h] = "#0a84ff";
+  for (const h of [26, 4, 22, 7, 82, 80, 81, 79]) coresTeclas[h] = "#ff0000";
+  for (const h of [44, 225, 224, 41]) coresTeclas[h] = "#00ffff";
   redesenharTeclas();
 });
 
