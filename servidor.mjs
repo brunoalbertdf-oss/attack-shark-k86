@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { K86, EFEITOS, TELA, MAX_QUADROS, ATRASO_MAX_MS } from "./k86.mjs";
+import { K86, EFEITOS, TELA, MAX_QUADROS, ATRASO_MAX_MS, EFEITO_RITMO_MUSICA, BANDAS_MUSICA, NIVEL_MUSICA_MAX } from "./k86.mjs";
 
 const PORTA = Number(process.env.PORTA) || 5186;
 const PASTA_PUBLICA = path.join(path.dirname(fileURLToPath(import.meta.url)), "public");
@@ -105,10 +105,12 @@ const rotas = {
       processosOficiais: await processosOficiais(),
       infoSistemaAtivo: infoSistema.ativo,
       efeitos: EFEITOS, tela: TELA, maxQuadros: MAX_QUADROS, atrasoMaxMs: ATRASO_MAX_MS,
+      musica: { efeito: EFEITO_RITMO_MUSICA, bandas: BANDAS_MUSICA, nivelMax: NIVEL_MUSICA_MAX },
     };
   },
   "POST /api/luz": async (corpo) => teclado.definirLuz(corpo),
   "POST /api/teclas": async (corpo) => teclado.definirCoresPorTecla(corpo.cores ?? {}, { brilho: corpo.brilho }),
+  "POST /api/musica": async (corpo) => (envioTela.ativo ? false : teclado.enviarMusica(corpo.niveis ?? [])),
   "POST /api/relogio": async () => teclado.acertarRelogio(new Date()),
   "POST /api/encerrar-oficial": async () => {
     const restantes = await encerrarProcessosOficiais();

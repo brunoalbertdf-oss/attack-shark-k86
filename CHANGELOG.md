@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 1.3.0
+
+- **Ritmo da música funciona**: o app captura o som do PC e envia ao teclado 32 bandas (0 a 6) ~30 vezes por
+  segundo, como o driver oficial (comando `0x0D`). Um medidor na lateral mostra o que está sendo enviado.
+  Funciona com o app aberto, mesmo minimizado.
+
 ## 1.2.1
 
 - Cores rápidas trocadas por **cores puras de LED** (vermelho, laranja, amarelo, verde, ciano, azul, roxo, rosa, branco):

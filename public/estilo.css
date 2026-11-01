@@ -107,6 +107,9 @@ input[type="color"] { width: 44px; height: 34px; border: 1px solid var(--borda);
 .direcoes .opcao.ativa { border-color: var(--destaque); box-shadow: 0 0 0 1px var(--destaque) inset; }
 .efeito .seta { font-size: 12px; color: var(--texto-fraco); font-weight: 400; }
 
+.medidor { display: flex; align-items: flex-end; gap: 2px; height: 42px; padding: 6px; border-radius: 8px; background: var(--superficie-2); }
+.medidor i { flex: 1; min-height: 2px; border-radius: 2px; background: var(--destaque); transition: height .05s linear; }
+
 .area-cor, .paleta-pincel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .area-cor.oculta { opacity: .4; pointer-events: none; }
 .cores-rapidas { display: flex; flex-wrap: wrap; gap: 6px; }

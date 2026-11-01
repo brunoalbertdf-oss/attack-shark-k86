@@ -45,6 +45,12 @@ export const EFEITOS = [
 ];
 const EFEITO_PERSONALIZADO = 13;
 const EFEITOS_MUSICA = [20, 22];
+export const EFEITO_RITMO_MUSICA = 22;
+// Ritmo da música: o driver oficial manda 32 bandas do som do PC, cada uma de 0 a 6,
+// duas por byte (nibble baixo = banda par). Só as 30 primeiras cabem no pacote.
+export const BANDAS_MUSICA = 32;
+export const NIVEL_MUSICA_MAX = 6;
+const CMD_AUDIO = 0x0d;
 
 // Posições de LED do K86 (128 posições da matriz). Chave = código HID da tecla.
 export const INDICE_POR_HID = {
@@ -170,6 +176,25 @@ export class K86 {
       this.#enviarCru(this.#pacoteLuz(config), BIT8);
       await esperar(300);
       return true;
+    });
+  }
+
+  // niveis: BANDAS_MUSICA números de 0 a NIVEL_MUSICA_MAX. Chamado ~30 vezes por segundo:
+  // se o teclado ainda estiver ocupado (ex.: enviando a tela), o quadro é descartado.
+  #musicaPendente = false;
+  enviarMusica(niveis) {
+    if (this.#musicaPendente) return Promise.resolve(false);
+    this.#musicaPendente = true;
+    return this.#exclusivo(async () => {
+      try {
+        const nivel = (i) => Math.max(0, Math.min(NIVEL_MUSICA_MAX, Math.round(niveis[i] || 0)));
+        const pacote = [CMD_AUDIO];
+        for (let c = 1; c < BANDAS_MUSICA / 2; c++) pacote[c] = (nivel(2 * c - 1) << 4) | nivel(2 * c - 2);
+        this.#enviarCru(pacote, null); // sem checksum, como no driver oficial
+        return true;
+      } finally {
+        this.#musicaPendente = false;
+      }
     });
   }
 

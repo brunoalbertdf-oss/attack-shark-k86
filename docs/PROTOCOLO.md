@@ -49,6 +49,7 @@ O PID `0x4015` é compartilhado por vários modelos. Existe outro "K86" (chip yc
 | `0x80` | GET_REV | Bit7 | Versão do firmware: `[2]<<8 \| [1]` | confirmado |
 | `0x07` / `0x87` | SET/GET_LEDPARAM | Bit8 / Bit7 | Efeito de luz | confirmado |
 | `0x0C` / `0x8C` | SET/GET_USERPIC | Bit7 | Cor por tecla | observado |
+| `0x0D` | SET_AUDIO | nenhum | Níveis do Ritmo da música | confirmado |
 | `0xA5` | GETTFTLCDDATA | Bit7 | Prepara envio para a tela | confirmado (uso) |
 | `0x25` | SETTFTLCDDATA | Bit7 | Pixels da tela | confirmado (uso) |
 | `0x28` | SET_OLEDCLOCK | Bit7 | Data e hora | confirmado |
@@ -100,6 +101,19 @@ Efeitos liberados pelo driver para o K86 e suas **opções/direções** (`opçã
 | 18 | Meteoro | |
 | 19 | Pressionar (apaga) | |
 | 22 | Ritmo da música | 0 vertical · 1 separado · 2 cruzado |
+
+### `0x0D` — Ritmo da música [confirmado]
+
+O teclado não ouve som: com o efeito 22 ativo, o PC precisa mandar os níveis continuamente.
+No driver oficial, o `iot_driver.exe` captura o áudio do Windows (WASAPI loopback, crate `cpal`), faz uma FFT de
+1024 amostras (`spectrum-analyzer`), mantém 32 bandas com decaimento `max(anterior × 0,84, atual)` e converte cada
+uma para um nível de 0 a 6.
+
+```
+[0]=0x0D  [c]=(nível[2c-1] << 4) | nível[2c-2]   para c = 1..15   sem checksum
+```
+
+Só as 30 primeiras bandas cabem. Este app usa bandas logarítmicas de 40 Hz a 16 kHz, com ganho automático.
 
 ### `0x0C` — cor por tecla [observado]
 

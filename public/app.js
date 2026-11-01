@@ -143,6 +143,83 @@ const atualizarControlesLuz = () => {
   $("#cor-luz").value = luz.cor;
   $$("#cores-rapidas .amostra").forEach((a) => a.classList.toggle("ativa", a.dataset.cor === luz.cor));
   $("#aviso-branco").hidden = luz.arcoIris || ef?.cor === false || !viraBrancoLimitado(luz.cor);
+  $("#campo-musica").hidden = luz.efeito !== MUSICA.efeito;
+  if (luz.efeito === MUSICA.efeito) ligarMusica(); else desligarMusica();
+};
+
+// ---------- Ritmo da música ----------
+// O teclado não ouve nada sozinho: como o driver oficial, o app captura o som do PC,
+// divide em 32 bandas de 0 a 6 e manda ~30 vezes por segundo.
+const MUSICA = { efeito: 22, bandas: 32, nivelMax: 6 };
+const musica = { fluxo: null, contexto: null, analisador: null, timer: null, niveis: [], teto: -50, enviando: false, ligando: false };
+
+const bandasMusica = (taxa, tamanhoFft) => {
+  // Faixas em escala logarítmica de 40 Hz a 16 kHz, como um equalizador.
+  const hzPorBin = taxa / tamanhoFft;
+  return Array.from({ length: MUSICA.bandas }, (_, i) => {
+    const ini = 40 * (16000 / 40) ** (i / MUSICA.bandas);
+    const fim = 40 * (16000 / 40) ** ((i + 1) / MUSICA.bandas);
+    const a = Math.max(1, Math.floor(ini / hzPorBin));
+    return [a, Math.max(a + 1, Math.ceil(fim / hzPorBin))];
+  });
+};
+
+const quadroMusica = (faixas, dados) => {
+  musica.analisador.getFloatFrequencyData(dados);
+  const db = faixas.map(([a, b]) => {
+    let maior = -Infinity;
+    for (let i = a; i < b && i < dados.length; i++) maior = Math.max(maior, dados[i]);
+    return maior;
+  });
+  // Ganho automático: a escala acompanha o volume, para a música aparecer em qualquer nível.
+  const pico = Math.max(...db);
+  musica.teto = Math.max(pico, musica.teto - 0.15, -60);
+  const piso = musica.teto - 42;
+  musica.niveis = db.map((v, i) => {
+    const atual = pico < -95 ? 0 : Math.max(0, Math.min(1, (v - piso) / (musica.teto - piso))) * MUSICA.nivelMax;
+    return Math.max((musica.niveis[i] ?? 0) * 0.84, atual); // mesmo decaimento do driver oficial
+  });
+  const barras = $("#medidor-musica").children;
+  musica.niveis.forEach((n, i) => { if (barras[i]) barras[i].style.height = `${(n / MUSICA.nivelMax) * 100}%`; });
+  if (musica.enviando) return;
+  musica.enviando = true;
+  api("/api/musica", { niveis: musica.niveis.map(Math.round) }).catch(() => {}).finally(() => { musica.enviando = false; });
+};
+
+const ligarMusica = async () => {
+  if (musica.timer || musica.ligando) return;
+  musica.ligando = true;
+  $("#estado-musica").textContent = "ligando…";
+  try {
+    const fluxo = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    fluxo.getVideoTracks().forEach((t) => t.stop());
+    if (!fluxo.getAudioTracks().length) throw new Error("sem áudio");
+    if (luz.efeito !== MUSICA.efeito) { fluxo.getTracks().forEach((t) => t.stop()); return; }
+    const contexto = new AudioContext();
+    const analisador = contexto.createAnalyser();
+    analisador.fftSize = 4096;
+    analisador.smoothingTimeConstant = 0.4;
+    contexto.createMediaStreamSource(fluxo).connect(analisador);
+    Object.assign(musica, { fluxo, contexto, analisador, niveis: [], teto: -50 });
+    const faixas = bandasMusica(contexto.sampleRate, analisador.fftSize);
+    const dados = new Float32Array(analisador.frequencyBinCount);
+    $("#medidor-musica").replaceChildren(...Array.from({ length: MUSICA.bandas }, () => document.createElement("i")));
+    musica.timer = setInterval(() => quadroMusica(faixas, dados), 33);
+    $("#estado-musica").textContent = "ouvindo";
+  } catch {
+    $("#estado-musica").textContent = "sem acesso ao som";
+    avisar("Não consegui ouvir o som do PC para o Ritmo da música.", true);
+  } finally {
+    musica.ligando = false;
+  }
+};
+
+const desligarMusica = () => {
+  if (!musica.timer && !musica.fluxo) return;
+  clearInterval(musica.timer);
+  musica.fluxo?.getTracks().forEach((t) => t.stop());
+  musica.contexto?.close().catch(() => {});
+  Object.assign(musica, { fluxo: null, contexto: null, analisador: null, timer: null, niveis: [] });
 };
 
 // O firmware troca por #B4B4B4 (branco a ~70%) toda cor com os três canais em 180 ou mais.
